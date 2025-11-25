@@ -2,3 +2,5 @@ numpy
 pygame
 contexttimer
 tqdm
+matplotlib
+pillow
