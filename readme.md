@@ -100,6 +100,12 @@ Larger portals = larger state space = longer cycles before finding a repeated pa
 | 16 | 65,536 | 15.4 | 155 | 14.0% |
 | 18 | 262,144 | 19.7 | 202 | 13.6% |
 | 20 | 1,048,576 | 25.7 | 268 | 13.6% |
+| 22 | 4,194,304 | 35.2 | 395 | 12.8% |
+| 24 | 16,777,216 | 47.2 | 489 | 13.5% |
+| 26 | 67,108,864 | 65.2 | 636 | 14.0% |
+| 28 | 268,435,456 | 88.4 | 1,138 | 13.4% |
+| 30 | 1,073,741,824 | 123.6 | 1,441 | 12.5% |
+| 32 | 4,294,967,296 | 169.4 | 1,965 | 11.5% |
 
 Mean cycle length grows steadily with portal width, while perfect loop rate decreases. This makes sense: larger state spaces have more possible patterns to explore before finding a repeat.
 

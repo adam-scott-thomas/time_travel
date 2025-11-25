@@ -357,7 +357,7 @@ fn main() {
 
     // Configuration - same as Python focused experiment
     let rules: Vec<u8> = vec![30, 45, 73, 90, 110, 150, 169, 182];
-    let widths: Vec<usize> = (6..=20).step_by(2).collect();  // 6, 8, 10, ..., 20
+    let widths: Vec<usize> = (6..=32).step_by(2).collect();  // 6, 8, 10, ..., 32
     let densities: Vec<f64> = vec![0.1, 0.3, 0.5, 0.7, 0.9];
     let reps = 500;
     let max_trips = 100000;
