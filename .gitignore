@@ -6,3 +6,5 @@
 results/*_raw.pkl
 results/*_aggregated.json
 animations/
+fast_sim/target/
+__pycache__/
