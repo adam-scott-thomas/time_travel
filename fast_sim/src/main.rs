@@ -49,6 +49,7 @@ struct SimResult {
     rule: u8,
     width: usize,
     density: f64,
+    distance: usize,  // Time travel distance (t_enter - t_exit)
     seed: u64,
     found_loop: bool,
     cycle_length: usize,
@@ -201,6 +202,7 @@ impl TimeTravelSimulator {
             rule: self.config.rule,
             width: self.config.portal_width,
             density: self.config.init_density,
+            distance: self.config.t_enter - self.config.t_exit,
             seed,
             found_loop,
             cycle_length,
@@ -211,15 +213,15 @@ impl TimeTravelSimulator {
     }
 }
 
-/// Run a batch of experiments in parallel
-fn run_batch(
+/// Run a batch of experiments varying time travel distance
+fn run_distance_experiment(
     rules: &[u8],
     widths: &[usize],
-    densities: &[f64],
+    distances: &[usize],
     reps: usize,
     max_trips: usize,
 ) -> Vec<SimResult> {
-    let total = rules.len() * widths.len() * densities.len() * reps;
+    let total = rules.len() * widths.len() * distances.len() * reps;
     println!("Running {} experiments...", total);
 
     let pb = ProgressBar::new(total as u64);
@@ -228,20 +230,29 @@ fn run_batch(
         .unwrap()
         .progress_chars("#>-"));
 
-    // Generate all configs
+    // Generate all configs with varying time travel distances
     let configs: Vec<(SimConfig, u64)> = rules.iter().flat_map(|&rule| {
         widths.iter().flat_map(move |&width| {
-            densities.iter().flat_map(move |&density| {
+            distances.iter().flat_map(move |&distance| {
                 (0..reps).map(move |rep| {
+                    // t_exit at 20, t_enter = t_exit + distance
+                    // num_generations needs to be > t_enter + some buffer
+                    let t_exit = 20;
+                    let t_enter = t_exit + distance;
+                    let num_gens = t_enter + 50;  // Buffer after portal entry
+
                     let config = SimConfig {
                         rule,
                         portal_width: width,
-                        init_density: density,
+                        init_density: 0.5,
+                        t_enter,
+                        t_exit,
+                        num_generations: num_gens,
                         ..Default::default()
                     };
-                    // Deterministic seed from config
+                    // Deterministic seed
                     let seed = ((rule as u64) << 48) | ((width as u64) << 32) |
-                               ((((density * 10.0) as u64) & 0xFFFF) << 16) | (rep as u64);
+                               ((distance as u64) << 16) | (rep as u64);
                     (config, seed)
                 })
             })
@@ -353,25 +364,29 @@ fn summarize(results: &[SimResult]) {
 fn main() {
     use std::time::Instant;
 
-    println!("=== Fast Time Travel Simulation (Rust) ===\n");
+    println!("=== Time Travel Distance Experiment ===\n");
 
-    // Configuration - same as Python focused experiment
-    let rules: Vec<u8> = vec![30, 45, 73, 90, 110, 150, 169, 182];
-    let widths: Vec<usize> = (6..=32).step_by(2).collect();  // 6, 8, 10, ..., 32
-    let densities: Vec<f64> = vec![0.1, 0.3, 0.5, 0.7, 0.9];
+    // Test how behavior changes with time travel distance
+    // Distance = t_enter - t_exit (how far back in time we go)
+
+    let rules: Vec<u8> = vec![30, 110];  // Focus on chaotic rules
+    let widths: Vec<usize> = vec![12, 16, 20];  // Representative widths
+    let distances: Vec<usize> = vec![5, 10, 20, 40, 60, 80, 100];  // Time travel distances
     let reps = 500;
     let max_trips = 100000;
 
     println!("Configuration:");
     println!("  Rules: {:?}", rules);
     println!("  Widths: {:?}", widths);
-    println!("  Densities: {:?}", densities);
+    println!("  Time travel distances: {:?}", distances);
     println!("  Reps per config: {}", reps);
-    println!("  Total experiments: {}", rules.len() * widths.len() * densities.len() * reps);
+
+    let total = rules.len() * widths.len() * distances.len() * reps;
+    println!("  Total experiments: {}", total);
     println!();
 
     let start = Instant::now();
-    let results = run_batch(&rules, &widths, &densities, reps, max_trips);
+    let results = run_distance_experiment(&rules, &widths, &distances, reps, max_trips);
     let elapsed = start.elapsed();
 
     println!("\nCompleted in {:.2}s ({:.1} experiments/sec)",
@@ -379,11 +394,71 @@ fn main() {
         results.len() as f64 / elapsed.as_secs_f64()
     );
 
-    summarize(&results);
+    // Summary by distance
+    println!("\n{}", "=".repeat(70));
+    println!("RESULTS BY TIME TRAVEL DISTANCE");
+    println!("{}", "=".repeat(70));
+    println!("\nDistance = how many time steps back the portal sends you");
+    println!("\n{:>10} {:>12} {:>12} {:>12} {:>12}", "Distance", "Mean Cycle", "Max Cycle", "Perfect %", "Samples");
+    println!("{}", "-".repeat(70));
+
+    let mut by_distance: HashMap<usize, Vec<&SimResult>> = HashMap::new();
+    for r in &results {
+        by_distance.entry(r.distance).or_default().push(r);
+    }
+    let mut dists: Vec<_> = by_distance.keys().collect();
+    dists.sort();
+
+    for dist in dists {
+        let data = &by_distance[dist];
+        let cycles: Vec<_> = data.iter().filter(|r| r.found_loop).map(|r| r.cycle_length).collect();
+        let perfect = data.iter().filter(|r| r.is_perfect).count();
+        let mean_cycle = if cycles.is_empty() { 0.0 } else {
+            cycles.iter().sum::<usize>() as f64 / cycles.len() as f64
+        };
+        let max_cycle = cycles.iter().max().unwrap_or(&0);
+
+        println!("{:>10} {:>12.1} {:>12} {:>11.1}% {:>12}",
+            dist, mean_cycle, max_cycle,
+            100.0 * perfect as f64 / data.len() as f64,
+            data.len()
+        );
+    }
+
+    // Also show by width for each distance
+    println!("\n{}", "=".repeat(70));
+    println!("RESULTS BY DISTANCE AND WIDTH");
+    println!("{}", "=".repeat(70));
+
+    for dist in [5, 20, 40, 100].iter() {
+        println!("\nDistance = {} steps back:", dist);
+        println!("{:>8} {:>12} {:>12} {:>12}", "Width", "Mean Cycle", "Max Cycle", "Perfect %");
+        println!("{}", "-".repeat(50));
+
+        for width in &widths {
+            let data: Vec<_> = results.iter()
+                .filter(|r| r.distance == *dist && r.width == *width)
+                .collect();
+
+            if data.is_empty() { continue; }
+
+            let cycles: Vec<_> = data.iter().filter(|r| r.found_loop).map(|r| r.cycle_length).collect();
+            let perfect = data.iter().filter(|r| r.is_perfect).count();
+            let mean_cycle = if cycles.is_empty() { 0.0 } else {
+                cycles.iter().sum::<usize>() as f64 / cycles.len() as f64
+            };
+            let max_cycle = cycles.iter().max().unwrap_or(&0);
+
+            println!("{:>8} {:>12.1} {:>12} {:>11.1}%",
+                width, mean_cycle, max_cycle,
+                100.0 * perfect as f64 / data.len() as f64
+            );
+        }
+    }
 
     // Save results
     std::fs::create_dir_all("../results").ok();
-    let file = File::create("../results/rust_results.json").expect("Failed to create results file");
+    let file = File::create("../results/distance_experiment.json").expect("Failed to create results file");
     serde_json::to_writer_pretty(file, &results).expect("Failed to write results");
-    println!("\nSaved detailed results to results/rust_results.json");
+    println!("\nSaved detailed results to results/distance_experiment.json");
 }
