@@ -88,18 +88,22 @@ After running **160,000 simulations** across:
 
 Larger portals = larger state space = longer cycles before finding a repeated pattern.
 
-| Width | State Space | Mean Cycle | Mean Pre-Cycle | Birthday Paradox Expected |
-|-------|-------------|------------|----------------|--------------------------|
-| 6 | 64 | 3.6 | 0.9 | 10 |
-| 8 | 256 | 3.4 | 1.4 | 20 |
-| 10 | 1,024 | 4.8 | 2.2 | 40 |
-| 12 | 4,096 | 4.6 | 3.0 | 80 |
-| 14 | 16,384 | 5.1 | 4.2 | 160 |
-| 16 | 65,536 | 6.5 | 5.4 | 321 |
-| 18 | 262,144 | 11.3 | 6.9 | 642 |
-| 20 | 1,048,576 | 14.1 | 8.7 | 1,283 |
+**Chaotic rules only (30, 110)** - shows the clearest trend:
 
-The pre-cycle length grows with portal width, but much slower than the birthday paradox would predict for random collisions. This suggests the CA dynamics constrain which patterns are reachable.
+| Width | State Space | Mean Cycle | Max Cycle | Perfect Loop % |
+|-------|-------------|------------|-----------|----------------|
+| 6 | 64 | 3.6 | 21 | 26.6% |
+| 8 | 256 | 5.0 | 33 | 20.7% |
+| 10 | 1,024 | 6.6 | 51 | 18.3% |
+| 12 | 4,096 | 8.8 | 96 | 15.9% |
+| 14 | 16,384 | 11.4 | 96 | 15.0% |
+| 16 | 65,536 | 15.4 | 155 | 14.0% |
+| 18 | 262,144 | 19.7 | 202 | 13.6% |
+| 20 | 1,048,576 | 25.7 | 268 | 13.6% |
+
+Mean cycle length grows steadily with portal width, while perfect loop rate decreases. This makes sense: larger state spaces have more possible patterns to explore before finding a repeat.
+
+Note: When aggregated across ALL rules (including Rule 90 which always produces cycle=1), these trends are diluted. The table above isolates the chaotic rules where oscillating loops are common.
 
 ### Finding 4: Initial Density Has Minimal Effect
 
