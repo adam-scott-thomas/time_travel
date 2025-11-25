@@ -1,10 +1,16 @@
-# Time Travel Paradoxes Don't Exist: A Cellular Automata Experiment
+# Time Travel Paradoxes in Cellular Automata: A Statistical Study
 
 ## TL;DR
 
-I simulated "time travel" in 1D cellular automata over **234,000+ experiments** to see what kinds of paradoxes emerge. The surprising result: **none**. Every single simulation converged to a self-consistent "stable time loop" on the very first trip through the time machine. The universe doesn't oscillate between states or spiral into chaos - it immediately finds a fixed point where the same pattern gets sent back in time forever.
+I simulated "time travel" in 1D cellular automata over **160,000 experiments** to see what kinds of paradoxes emerge. The key findings:
 
-This is the **Novikov self-consistency principle** in action: physics (or at least cellular automata physics) doesn't allow paradoxes.
+- **34% achieve perfect loops** - the same pattern gets sent back forever (stable time loop)
+- **66% are oscillating loops** - patterns cycle through multiple states before repeating
+- **Mean cycle length: 6.7 trips** - most oscillations are short, but some reach 300+ trips
+- **No infinite paradoxes** - every simulation eventually converges to a repeating pattern
+- **Behavior varies dramatically by rule** - Rule 30 (chaotic) averages 18-trip cycles, while Rule 90 always produces perfect loops
+
+The universe *eventually* achieves self-consistency, but often only after "trying out" different patterns!
 
 ---
 
@@ -14,27 +20,27 @@ This is the **Novikov self-consistency principle** in action: physics (or at lea
 
 1D Cellular Automata (CA) are simple computational systems where a row of cells evolves over time based on local rules. Each cell looks at itself and its neighbors, then decides its next state. Despite their simplicity, CA can produce remarkably complex behavior.
 
-![Different CA Rules](figures/ca_rules_overview.png)
-*Different Wolfram rules produce wildly different patterns - from simple triangles to chaotic noise.*
-
 The most famous is **Rule 110**, which is actually Turing-complete - meaning it can compute anything a regular computer can!
 
 ### Simulating Time Travel
 
 I created a "time portal" in the cellular automata universe:
 
-1. **Portal Entry** (green): At time t=50, cells in a specific region enter the portal
-2. **Portal Exit** (red): Those cells emerge at time t=20, in the past
-3. The simulation continues from t=20 with the new cells, potentially creating different future states
+1. **Start**: Initialize a random row of cells
+2. **Evolve**: Run the CA forward in time
+3. **Portal Entry**: At time t=80, capture cells in a specific region
+4. **Portal Exit**: Insert those cells at time t=40 (in the past!)
+5. **Re-evolve**: Continue from t=40 with the modified state
+6. **Repeat**: Check if the portal captures the same pattern as before
 
-The key question: **What happens when the cells that exit the portal are different from the cells that originally existed at t=20?**
+The key question: **How many trips through the time machine before the pattern repeats?**
 
 ### The Paradox Tropes I Expected
 
 Based on sci-fi movies, I expected to find:
 
-- **Perfect Loops**: Pattern A goes back in time, causes exactly pattern A to be sent back (stable)
-- **Oscillating Loops**: Pattern A leads to B, B leads to C, C leads back to A (cycles forever)
+- **Perfect Loops**: Pattern A goes back in time, causes exactly pattern A to be sent back (cycle=1)
+- **Oscillating Loops**: Pattern A leads to B, B leads to C, C leads back to A (cycle>1)
 - **Growing Chaos**: Each trip through the portal creates increasingly different results
 - **Convergence After Struggle**: Initial chaos that eventually settles into a pattern
 
@@ -42,46 +48,70 @@ Based on sci-fi movies, I expected to find:
 
 ## The Results
 
-### The Shocking Finding: 100% Perfect Loops
+### Finding 1: Both Loop Types Exist!
 
-After running **234,000+ simulations** across:
-- All 256 Wolfram rules
-- Portal widths from 4 to 48 cells (state spaces from 16 to 281 trillion states)
-- Time gaps from 2 to 100 steps
+After running **160,000 simulations** across:
+- 8 different Wolfram rules (30, 45, 73, 90, 110, 150, 169, 182)
+- Portal widths from 6 to 20 cells
 - Initial densities from 10% to 90%
-- With and without boundary effects
+- 500 random seeds per configuration
 
-**Every single experiment produced a perfect loop with cycle length 1, achieved on the FIRST trip.**
+| Metric | Value |
+|--------|-------|
+| Total experiments | 160,000 |
+| Loops found | 100% |
+| Perfect loops (cycle=1) | 34.1% |
+| Oscillating loops (cycle>1) | 65.9% |
+| Mean cycle length | 6.68 trips |
+| Max cycle length | 308 trips |
+| Mean pre-cycle length | 4.08 trips |
+| Max pre-cycle length | 296 trips |
 
-![Summary Statistics](figures/summary_statistics.png)
+### Finding 2: Behavior Depends Strongly on the CA Rule
 
-### No Oscillating Loops Exist
+| Rule | Perfect Loops | Mean Cycle | Max Cycle |
+|------|--------------|------------|-----------|
+| 30 (chaotic) | 8.3% | 18.0 | 308 |
+| 45 | 18.7% | 5.7 | 77 |
+| 73 | 11.7% | 5.7 | 146 |
+| **90 (simple)** | **100%** | **1.0** | **1** |
+| 110 (Turing-complete) | 26.5% | 6.3 | 82 |
+| 150 | 16.8% | 13.1 | 34 |
+| **169** | **73.5%** | **1.5** | **18** |
+| 182 | 17.3% | 2.2 | 14 |
 
-I specifically hunted for oscillating loops (where the pattern cycles through multiple states before repeating). I tested:
-- Every Wolfram rule (0-255)
-- Various portal widths
-- Thousands of random initial conditions
+**Rule 90** (XOR rule) *always* produces perfect loops - its linear structure guarantees self-consistency.
 
-**Zero oscillating loops found.**
+**Rule 30** (famous for generating randomness) produces the longest cycles and most chaotic behavior, with only 8% achieving immediate stability.
 
-### Immediate Convergence
+### Finding 3: Portal Width Matters
 
-Even more surprising: the system doesn't "try out" different patterns before finding stability. The pre-cycle length is **always zero**. The very first pattern sent through the time portal is already the fixed point.
+Larger portals = larger state space = longer cycles before finding a repeated pattern.
 
-This held true even when I:
-- Made the portal span nearly the entire universe
-- Reduced the time gap to just 2 steps
-- Randomized the cells outside the portal region each trip
+| Width | State Space | Mean Cycle | Mean Pre-Cycle | Birthday Paradox Expected |
+|-------|-------------|------------|----------------|--------------------------|
+| 6 | 64 | 3.6 | 0.9 | 10 |
+| 8 | 256 | 3.4 | 1.4 | 20 |
+| 10 | 1,024 | 4.8 | 2.2 | 40 |
+| 12 | 4,096 | 4.6 | 3.0 | 80 |
+| 14 | 16,384 | 5.1 | 4.2 | 160 |
+| 16 | 65,536 | 6.5 | 5.4 | 321 |
+| 18 | 262,144 | 11.3 | 6.9 | 642 |
+| 20 | 1,048,576 | 14.1 | 8.7 | 1,283 |
 
-![Different portal widths all converge immediately](figures/portal_width_comparison.png)
-*Regardless of portal width (and thus state space size), all simulations converge immediately.*
+The pre-cycle length grows with portal width, but much slower than the birthday paradox would predict for random collisions. This suggests the CA dynamics constrain which patterns are reachable.
 
-### Rule Independence
+### Finding 4: Initial Density Has Minimal Effect
 
-The behavior is independent of which CA rule is used. Chaotic rules like Rule 30, computational rules like Rule 110, and simple rules all behave the same way.
+| Density | Perfect Loop Rate | Mean Cycle |
+|---------|-------------------|------------|
+| 0.1 | 35.7% | 6.8 |
+| 0.3 | 31.8% | 6.6 |
+| 0.5 | 31.8% | 6.6 |
+| 0.7 | 33.7% | 6.7 |
+| 0.9 | 37.5% | 6.8 |
 
-![All rules show the same behavior](figures/rule_comparison.png)
-*Different CA rules produce different patterns, but all achieve immediate self-consistency.*
+The extreme densities (0.1 and 0.9) slightly favor perfect loops, but the effect is minor.
 
 ---
 
@@ -89,55 +119,40 @@ The behavior is independent of which CA rule is used. Chaotic rules like Rule 30
 
 ### The Mathematical View
 
-Consider time travel as a function composition:
-- Let `f` be the CA evolution function for one time step
-- Let `T = f^k` be evolution for `k` time steps (from portal exit to entry)
-- Let `P` be the portal projection (extracting the portal region)
+Consider time travel as a function:
+- Let `f` be the CA evolution from t_exit to t_enter
+- Let `P` extract the portal region
+- A time loop asks: find the smallest `k` where `(P o f)^k(x) = (P o f)^j(x)` for some `j < k`
 
-A time travel loop asks: find pattern `x` such that `P(T(insert(x))) = x`
+This is asking for an **eventual cycle** in a finite state machine. Since there are only `2^width` possible portal states, the system *must* eventually repeat - the question is how long it takes.
 
-This is asking for a **fixed point** of the composed function. The remarkable result is that:
-1. Fixed points always exist
-2. The CA dynamics find them immediately
+### Why Different Rules Behave Differently
 
-### Physical Interpretation: Self-Consistency
+**Rule 90** (XOR) is *linear* over GF(2) - the state after k steps is a linear function of the initial state. This linear structure means the time travel dynamics form a very constrained system with many fixed points.
 
-This mirrors the **Novikov self-consistency principle** from physics, which suggests that if time travel exists, the universe would only allow self-consistent histories. You can't create a paradox because the physics won't let you.
+**Rule 30** is highly *nonlinear* and chaotic. The state space is explored more thoroughly before landing on a cycle, leading to longer pre-cycle and cycle lengths.
 
-In our CA universe, the deterministic rules of physics (the CA evolution) combined with the time loop constraint naturally select for stable, self-consistent states.
+### The Novikov Connection
 
-### Why Immediate Convergence?
+This relates to the **Novikov self-consistency principle** from physics: if time travel exists, the universe only allows self-consistent histories. Our simulations show that:
 
-The immediate convergence (zero pre-cycle length) suggests something deeper. The CA dynamics are not "searching" for a fixed point - they're constrained to land on one immediately.
-
-Think of it this way: the portal region's future state is determined by:
-1. The cells sent back through the portal
-2. The boundary cells (outside the portal, which follow their normal evolution)
-
-The boundary cells provide "anchoring" that constrains what patterns can be self-consistent. Given these constraints, there may be only one or a small number of valid solutions, and the system naturally produces one of them.
+1. Self-consistency is *always* achieved (all simulations find loops)
+2. But it may take multiple "iterations" to find the consistent state
+3. The number of iterations depends on the physics (CA rule)
 
 ---
 
-## Implications
+## Performance: Python vs Rust
 
-### For Time Travel Fiction
+I implemented the simulation in both Python and Rust:
 
-Most sci-fi time travel stories rely on paradoxes for drama:
-- The grandfather paradox
-- Bootstrap paradoxes
-- Oscillating cause-effect loops
+| Implementation | Time for 160k experiments | Speed |
+|---------------|---------------------------|-------|
+| Python (multiprocessing) | 119.2 seconds | 1,342 exp/sec |
+| Rust (rayon) | 5.5 seconds | 29,181 exp/sec |
+| **Speedup** | | **~22x** |
 
-Our results suggest that if the universe has deterministic physics (like CA), **none of these paradoxes can occur**. The universe would simply enforce self-consistency.
-
-### For Physics
-
-This aligns with theoretical physics proposals like:
-- **Novikov self-consistency conjecture**: Closed timelike curves only allow self-consistent events
-- **Deutsch's quantum mechanics approach**: Time loops select for consistent quantum states
-
-### For Computation
-
-From a computational perspective, finding fixed points of complex functions is generally hard. Yet CA with time travel find them instantly. This suggests these functions have special structure that makes fixed points easy to find - possibly because they're everywhere.
+The Rust version avoids Python overhead and numpy array allocations in the hot loop. For large-scale experiments, the Rust version is strongly recommended.
 
 ---
 
@@ -156,41 +171,51 @@ from simulation import SimConfig, TimeTravelSimulator
 
 config = SimConfig(
     rule=110,
-    portal_width=20,
+    portal_width=16,
     init_density=0.5,
-    t_enter=50,
-    t_exit=20,
+    t_enter=80,
+    t_exit=40,
 )
 
 sim = TimeTravelSimulator(config)
 result = sim.run(max_trips=1000, seed=42)
 
 print(f"Loop found: {result.found_loop}")
-print(f"Cycle length: {result.cycle_length}")
-print(f"Pre-cycle: {result.pre_cycle_length}")
+print(f"Cycle length: {result.cycle_length}")  # How many trips in the cycle
+print(f"Pre-cycle: {result.pre_cycle_length}")  # Trips before cycle started
+print(f"Perfect loop: {result.is_perfect_loop}")  # True if cycle_length=1
 ```
 
 ### Run Experiments
 
 ```bash
-# Quick test
-python experiments.py quick
+# Focused experiment (Python)
+python focused_experiment.py
 
-# Full experiment
-python detailed_experiments.py full
+# With profiling
+python focused_experiment.py profile
+
+# Rust version (much faster!)
+cd fast_sim
+cargo build --release
+./target/release/time_travel_sim
 ```
 
 ---
 
 ## Conclusion
 
-When I started this project, I expected to find a rich taxonomy of paradox types with interesting statistical properties. Instead, I found something more profound: **paradoxes don't exist** in deterministic cellular automata with time travel.
+Time travel in cellular automata is neither trivially stable nor hopelessly chaotic. The key findings:
 
-The universe (or at least this toy universe) enforces self-consistency automatically and immediately. There's no struggling, no oscillation, no chaos - just instant convergence to a stable time loop.
+1. **Loops always exist** - the finite state space guarantees eventual repetition
+2. **Most loops oscillate** - 66% of simulations cycle through multiple states
+3. **Rule matters enormously** - chaotic rules produce longer cycles
+4. **Larger portals take longer** - but growth is sublinear relative to state space
 
-This suggests that the "grandfather paradox" and its cousins might be more about our intuitions failing us than about genuine physical possibilities. In a deterministic universe with time travel, the math simply doesn't permit contradictions.
-
-The movie version might be less dramatic, but the physics version is more elegant: you can't change the past because the past already includes your time-traveling self, and always did.
+The sci-fi implications:
+- Grandfather paradoxes are impossible (the universe finds consistency)
+- But you might experience different "timeline iterations" before stability
+- Simple physics = immediate stability; complex physics = longer struggle
 
 ---
 
@@ -198,12 +223,15 @@ The movie version might be less dramatic, but the physics version is more elegan
 
 ```
 time_travel/
-    simulation.py          # Core CA + time travel simulation
-    experiments.py         # Large-scale experiment runner
-    detailed_experiments.py # Focused analysis experiments
-    create_visualizations.py # Figure generation
-    figures/               # Generated plots
-    results/               # Experiment data (JSON)
+    simulation.py           # Core CA + time travel simulation (Python)
+    test_simulation.py      # Unit tests
+    focused_experiment.py   # Main experiment runner
+    fast_sim/               # Rust implementation (22x faster)
+        src/main.rs
+        Cargo.toml
+    results/                # Experiment data (JSON)
+        focused_results.json
+        rust_results.json
 ```
 
 ---
@@ -213,5 +241,5 @@ time_travel/
 - Investigate 2D cellular automata with time travel
 - Explore stochastic CA rules (non-deterministic)
 - Study time travel with multiple portals
-- Analyze the structure of fixed-point attractors
-- Investigate quantum cellular automata with time loops
+- Analyze the structure of cycle attractors
+- Compare with quantum cellular automata predictions

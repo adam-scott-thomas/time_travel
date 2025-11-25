@@ -116,12 +116,18 @@ class TimeTravelSimulator:
         new_row = self.rule_lookup[7 - indices]
         return new_row
 
-    def _check_portal(self) -> Optional[SimResult]:
-        """Check if we've entered the portal and handle time travel."""
+    def _check_portal(self) -> Tuple[Optional[SimResult], bool]:
+        """Check if we've entered the portal and handle time travel.
+
+        Returns:
+            Tuple of (result, time_travel_happened)
+            - result: SimResult if loop found, None otherwise
+            - time_travel_happened: True if time travel occurred this step
+        """
         cfg = self.config
 
         if self.current_gen != cfg.t_enter:
-            return None
+            return None, False
 
         # Extract portal contents from next generation
         portal_slice = slice(self.portal_x, self.portal_x + cfg.portal_width)
@@ -137,7 +143,7 @@ class TimeTravelSimulator:
                 cycle_length=self.trips - first_trip,
                 total_trips=self.trips,
                 found_loop=True
-            )
+            ), True
 
         # Record this pattern
         self.history[portal_contents] = self.trips
@@ -146,9 +152,10 @@ class TimeTravelSimulator:
         self.universe[cfg.t_exit, portal_slice] = portal_contents
 
         # Reset to continue from exit point
+        # Stay at t_exit so next step() will evolve from the NEW t_exit row
         self.current_gen = cfg.t_exit
 
-        return None
+        return None, True  # Time travel happened, but no loop yet
 
     def step(self) -> bool:
         """Advance simulation by one step. Returns True if loop found."""
@@ -162,12 +169,17 @@ class TimeTravelSimulator:
             self.universe[self.current_gen + 1] = self._evolve_row(self.current_gen)
 
         # Check for portal entry and time travel
-        result = self._check_portal()
+        result, time_traveled = self._check_portal()
         if result is not None:
             self.result = result
             return True
 
-        self.current_gen += 1
+        # Only increment if we didn't time travel
+        # Time travel sets current_gen to t_exit, and we need to stay there
+        # so the next step() evolves from the NEW t_exit state
+        if not time_traveled:
+            self.current_gen += 1
+
         return False
 
     def run(self, max_trips: int = 10000, seed: Optional[int] = None) -> SimResult:
