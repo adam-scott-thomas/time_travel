@@ -8,3 +8,4 @@ results/*_aggregated.json
 animations/
 fast_sim/target/
 __pycache__/
+results/distance_highres.json

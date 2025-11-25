@@ -364,21 +364,21 @@ fn summarize(results: &[SimResult]) {
 fn main() {
     use std::time::Instant;
 
-    println!("=== Time Travel Distance Experiment ===\n");
+    println!("=== Time Travel Distance Experiment (High Resolution) ===\n");
 
     // Test how behavior changes with time travel distance
-    // Distance = t_enter - t_exit (how far back in time we go)
+    // Every step from 5-100 to detect any periodic patterns
 
-    let rules: Vec<u8> = vec![30, 110];  // Focus on chaotic rules
-    let widths: Vec<usize> = vec![12, 16, 20];  // Representative widths
-    let distances: Vec<usize> = vec![5, 10, 20, 40, 60, 80, 100];  // Time travel distances
-    let reps = 500;
+    let rules: Vec<u8> = vec![30, 110];  // Chaotic rules separately
+    let widths: Vec<usize> = vec![16];   // Fix width to reduce variables
+    let distances: Vec<usize> = (5..=100).collect();  // Every step from 5-100
+    let reps = 2500;  // 5x more samples for statistical significance
     let max_trips = 100000;
 
     println!("Configuration:");
     println!("  Rules: {:?}", rules);
-    println!("  Widths: {:?}", widths);
-    println!("  Time travel distances: {:?}", distances);
+    println!("  Width: {:?}", widths);
+    println!("  Distances: 5-100 (every step, {} values)", distances.len());
     println!("  Reps per config: {}", reps);
 
     let total = rules.len() * widths.len() * distances.len() * reps;
@@ -394,50 +394,17 @@ fn main() {
         results.len() as f64 / elapsed.as_secs_f64()
     );
 
-    // Summary by distance
-    println!("\n{}", "=".repeat(70));
-    println!("RESULTS BY TIME TRAVEL DISTANCE");
-    println!("{}", "=".repeat(70));
-    println!("\nDistance = how many time steps back the portal sends you");
-    println!("\n{:>10} {:>12} {:>12} {:>12} {:>12}", "Distance", "Mean Cycle", "Max Cycle", "Perfect %", "Samples");
-    println!("{}", "-".repeat(70));
+    // Summary by distance for each rule separately
+    for rule in &rules {
+        println!("\n{}", "=".repeat(70));
+        println!("RULE {} - RESULTS BY TIME TRAVEL DISTANCE", rule);
+        println!("{}", "=".repeat(70));
+        println!("\n{:>8} {:>10} {:>10} {:>10} {:>8}", "Dist", "MeanCycle", "MaxCycle", "Perfect%", "N");
+        println!("{}", "-".repeat(70));
 
-    let mut by_distance: HashMap<usize, Vec<&SimResult>> = HashMap::new();
-    for r in &results {
-        by_distance.entry(r.distance).or_default().push(r);
-    }
-    let mut dists: Vec<_> = by_distance.keys().collect();
-    dists.sort();
-
-    for dist in dists {
-        let data = &by_distance[dist];
-        let cycles: Vec<_> = data.iter().filter(|r| r.found_loop).map(|r| r.cycle_length).collect();
-        let perfect = data.iter().filter(|r| r.is_perfect).count();
-        let mean_cycle = if cycles.is_empty() { 0.0 } else {
-            cycles.iter().sum::<usize>() as f64 / cycles.len() as f64
-        };
-        let max_cycle = cycles.iter().max().unwrap_or(&0);
-
-        println!("{:>10} {:>12.1} {:>12} {:>11.1}% {:>12}",
-            dist, mean_cycle, max_cycle,
-            100.0 * perfect as f64 / data.len() as f64,
-            data.len()
-        );
-    }
-
-    // Also show by width for each distance
-    println!("\n{}", "=".repeat(70));
-    println!("RESULTS BY DISTANCE AND WIDTH");
-    println!("{}", "=".repeat(70));
-
-    for dist in [5, 20, 40, 100].iter() {
-        println!("\nDistance = {} steps back:", dist);
-        println!("{:>8} {:>12} {:>12} {:>12}", "Width", "Mean Cycle", "Max Cycle", "Perfect %");
-        println!("{}", "-".repeat(50));
-
-        for width in &widths {
+        for dist in &distances {
             let data: Vec<_> = results.iter()
-                .filter(|r| r.distance == *dist && r.width == *width)
+                .filter(|r| r.rule == *rule && r.distance == *dist)
                 .collect();
 
             if data.is_empty() { continue; }
@@ -449,16 +416,17 @@ fn main() {
             };
             let max_cycle = cycles.iter().max().unwrap_or(&0);
 
-            println!("{:>8} {:>12.1} {:>12} {:>11.1}%",
-                width, mean_cycle, max_cycle,
-                100.0 * perfect as f64 / data.len() as f64
+            println!("{:>8} {:>10.1} {:>10} {:>9.1}% {:>8}",
+                dist, mean_cycle, max_cycle,
+                100.0 * perfect as f64 / data.len() as f64,
+                data.len()
             );
         }
     }
 
     // Save results
     std::fs::create_dir_all("../results").ok();
-    let file = File::create("../results/distance_experiment.json").expect("Failed to create results file");
+    let file = File::create("../results/distance_highres.json").expect("Failed to create results file");
     serde_json::to_writer_pretty(file, &results).expect("Failed to write results");
-    println!("\nSaved detailed results to results/distance_experiment.json");
+    println!("\nSaved detailed results to results/distance_highres.json");
 }
