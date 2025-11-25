@@ -1,0 +1,197 @@
+{
+  "6": {
+    "width": 6,
+    "state_space": 64,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "8": {
+    "width": 8,
+    "state_space": 256,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "10": {
+    "width": 10,
+    "state_space": 1024,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "12": {
+    "width": 12,
+    "state_space": 4096,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "14": {
+    "width": 14,
+    "state_space": 16384,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "16": {
+    "width": 16,
+    "state_space": 65536,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "18": {
+    "width": 18,
+    "state_space": 262144,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "20": {
+    "width": 20,
+    "state_space": 1048576,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "22": {
+    "width": 22,
+    "state_space": 4194304,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "24": {
+    "width": 24,
+    "state_space": 16777216,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "26": {
+    "width": 26,
+    "state_space": 67108864,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "28": {
+    "width": 28,
+    "state_space": 268435456,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "30": {
+    "width": 30,
+    "state_space": 1073741824,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "32": {
+    "width": 32,
+    "state_space": 4294967296,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  },
+  "34": {
+    "width": 34,
+    "state_space": 17179869184,
+    "num_samples": 2000,
+    "mean_pre_cycle": 0.0,
+    "median_pre_cycle": 0.0,
+    "std_pre_cycle": 0.0,
+    "max_pre_cycle": 0,
+    "mean_total_trips": 2.0,
+    "pre_cycle_dist": {
+      "0": 2000
+    }
+  }
+}
