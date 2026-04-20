@@ -15,21 +15,35 @@
 # limitations under the License.
 
 import pickle
+from typing import Tuple, Optional, Union, Iterator, Callable, Any
 from tqdm import tqdm
 from multiprocessing import Pool, cpu_count
 
-from time_cell import TimeCell, Config
+from time_cell import TimeCell, Config, Result
 
 
-def single_run(cfg):
-    """run a set for a particular config.
-    cfg: Config object represetting settings."""
+def single_run(cfg: Config) -> Tuple[Config, Optional[Result]]:
+    """Run a single time travel simulation with given configuration.
+
+    Args:
+        cfg: Configuration object with simulation parameters
+
+    Returns:
+        Tuple of (configuration, result) where result is None if no loop found
+    """
     ca = TimeCell(config=cfg, quick_compute=True)
     res = ca.run_until_time_loop()
     return cfg, res
 
-def count_pickles(f_name):
-    """Count the number of objects that has been stored in a pickle file"""
+def count_pickles(f_name: str) -> int:
+    """Count the number of objects stored in a pickle file.
+
+    Args:
+        f_name: Path to the pickle file
+
+    Returns:
+        Number of pickled objects in the file, 0 if file doesn't exist
+    """
     count = 0
     try:
         with open(f_name, "rb") as f:
@@ -39,43 +53,56 @@ def count_pickles(f_name):
                     count += 1
                 except EOFError:
                     return count
-    except IOError:  # handle case of no file there yet
+    except IOError:  # Handle case where file doesn't exist yet
         return 0
 
-def run_job_server(func, experiments, save_file, resume=True, num_experiments=None, n_cores=None):
-    """Runs a job server to run the given func over a list of many input args (experiments).
-    Runs with a multiprocess pool, saves all results to a picke file, can resume if cancelled,
-    and displays a progress bar.
-    func: the function the job server will be calling.
-    experiments: list or generator of args to pass to func. If a generator, also pass in num_experiments.
-    save_file: str file name of where to save our picked results.
-    resume: whether to resume a cancelled run.
-    num_experiments: None or int. required if experiments is a generator expression.
-    n_cores: None or int. overrides using all they systems cores.
-    """
+def run_job_server(
+    func: Callable[[Config], Tuple[Config, Optional[Result]]],
+    experiments: Union[list[Config], Iterator[Config]],
+    save_file: str,
+    resume: bool = True,
+    num_experiments: Optional[int] = None,
+    n_cores: Optional[int] = None
+) -> None:
+    """Run parallel experiments using multiprocessing with progress tracking and resume capability.
 
+    This function provides a robust framework for running large-scale parameter sweeps:
+    - Parallel execution across multiple CPU cores
+    - Progress bar visualization with tqdm
+    - Automatic resume capability for interrupted runs
+    - Results saved incrementally to pickle file
+
+    Args:
+        func: Function to call for each experiment (typically single_run)
+        experiments: List or generator of experiment configurations
+        save_file: Path where pickled results will be saved
+        resume: If True, resume from previously saved results
+        num_experiments: Total number of experiments (required for generators)
+        n_cores: Number of CPU cores to use (default: all available)
+    """
     if n_cores is None:
         n_cores = cpu_count()
 
     if hasattr(experiments, "__len__"):
         num_experiments = len(experiments)
 
-    # resume a previous run?
+    # Resume from previous run if requested
     start_index = 0
     if resume:
         start_index = count_pickles(save_file)
         if start_index != 0:
-            print("Resuming from index: {}".format(start_index))
-        # burn off that many experiments
+            print(f"Resuming from index: {start_index}")
+        # Skip already completed experiments
         for _ in range(start_index):
             next(experiments)
 
     with Pool(n_cores) as p:
         for result in tqdm(
-                            p.imap(single_run, experiments),
-                            total=num_experiments,
-                            initial=start_index):
-            # write results one at a time to a pickle object, so we never need to store them in mem
+            p.imap(single_run, experiments),
+            total=num_experiments,
+            initial=start_index
+        ):
+            # Save results incrementally to avoid memory buildup
             with open(save_file, "ab") as f:
                 pickle.dump(result, f)
 
